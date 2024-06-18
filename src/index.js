@@ -1,35 +1,45 @@
 const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
+const { getCacheFilePath } = require("./utils/cache");
+const { checkFileExists } = require("./utils/file");
+const { getFakeHeaders, getTiandituUrl } = require("./utils/tianditu");
+const { fetchBuffer } = require("./utils/request");
+const { saveImage } = require("./utils/image");
+
 const app = express();
-const { saveTileImage } = require("./file");
-const { mergeImages } = require("./image");
 
 app.get("/tianditu", async (req, res) => {
-  const { layer, z, y, x } = req.query;
-  const options = {
+  const commonOptions = {
     tk: process.env.TIANDITU_TK,
-    layer,
-    tileMatrixSet: "c",
-    z,
-    y,
-    x,
+    tileMatrixSet: req.query.tileMatrixSet || "c",
+    z: req.query.z,
+    y: req.query.y,
+    x: req.query.x
   };
-  const imgPath = await saveTileImage(options);
-  if (layer === "vec") {
-    const annotation = await saveTileImage({
-      ...options,
-      layer: "cva",
-    });
-    const mergedOptions = {
-      ...options,
-      layer: "vec_cva",
-    };
-    const mergedPath = await mergeImages([imgPath, annotation], mergedOptions);
-    // return mergedPath;
-    res.sendFile(mergedPath);
+  const mainLayerOptions = {
+    ...commonOptions,
+    layer: req.query.layer
+  };
+  const mainLayerCachePath = getCacheFilePath({
+    ...mainLayerOptions,
+    format: "png",
+    dir: process.env.TILE_CACHE_DIR
+  });
+  const mainLayerEx = checkFileExists(mainLayerCachePath);
+  if (mainLayerEx) {
+    res.sendFile(mainLayerCachePath);
   } else {
-    res.sendFile(imgPath);
+    const mainLayerTileUrl = getTiandituUrl(mainLayerOptions);
+    const mainLayerBuffer = await fetchBuffer(mainLayerTileUrl, {
+      headers: getFakeHeaders()
+    });
+
+    await saveImage(mainLayerBuffer, {
+      format: "png",
+      path: mainLayerCachePath
+    });
+    res.sendFile(mainLayerCachePath);
   }
 });
 

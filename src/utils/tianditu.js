@@ -1,6 +1,9 @@
 function getTiandituUrl(options) {
   const { layer, tileMatrixSet, tk, z, y, x } = options;
-  const url = `t0.tianditu.gov.cn/${layer}_${tileMatrixSet}/wmts`;
+  // t0-t7
+  const domainNum = Math.floor(Math.random() * 8);
+  const domain = `t${domainNum}.tianditu.gov.cn`;
+  const url = `${domain}/${layer}_${tileMatrixSet}/wmts`;
   const params = {
     SERVICE: "WMTS",
     REQUEST: "GetTile",
@@ -12,12 +15,20 @@ function getTiandituUrl(options) {
     TILEMATRIX: z,
     TILEROW: y,
     TILECOL: x,
-    tk,
+    tk
   };
   const searchParams = new URLSearchParams(params);
   return `http://${url}?${searchParams.toString()}`;
 }
 
+function getFakeHeaders() {
+  return {
+    "User-Agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+  };
+}
+
 module.exports = {
   getTiandituUrl,
+  getFakeHeaders
 };
