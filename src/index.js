@@ -1,11 +1,7 @@
 const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
-const { getCacheFilePath } = require("./utils/cache");
-const { checkFileExists } = require("./utils/file");
-const { getFakeHeaders, getTiandituUrl } = require("./utils/tianditu");
-const { fetchBuffer } = require("./utils/request");
-const { saveImage } = require("./utils/image");
+const { getTileImagePath } = require("./methods/tile");
 
 const app = express();
 
@@ -15,32 +11,16 @@ app.get("/tianditu", async (req, res) => {
     tileMatrixSet: req.query.tileMatrixSet || "c",
     z: req.query.z,
     y: req.query.y,
-    x: req.query.x
+    x: req.query.x,
+    format: req.query.format || "png"
   };
   const mainLayerOptions = {
     ...commonOptions,
-    layer: req.query.layer
+    layer: req.query.layer,
+    cacheDir: process.env.TILE_CACHE_DIR
   };
-  const mainLayerCachePath = getCacheFilePath({
-    ...mainLayerOptions,
-    format: "png",
-    dir: process.env.TILE_CACHE_DIR
-  });
-  const mainLayerEx = checkFileExists(mainLayerCachePath);
-  if (mainLayerEx) {
-    res.sendFile(mainLayerCachePath);
-  } else {
-    const mainLayerTileUrl = getTiandituUrl(mainLayerOptions);
-    const mainLayerBuffer = await fetchBuffer(mainLayerTileUrl, {
-      headers: getFakeHeaders()
-    });
-
-    await saveImage(mainLayerBuffer, {
-      format: "png",
-      path: mainLayerCachePath
-    });
-    res.sendFile(mainLayerCachePath);
-  }
+  const mainLayerCachePath = await getTileImagePath(mainLayerOptions);
+  res.sendFile(mainLayerCachePath);
 });
 
 app.listen(3000);
