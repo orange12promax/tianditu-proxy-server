@@ -6,6 +6,7 @@ const { getTileImagePath, getMergedTileImagePath } = require("./methods/tile");
 const app = express();
 
 app.get("/tianditu", async (req, res) => {
+  const cacheDisabled = parseInt(process.env.CACHE_DISABLED) === 1;
   const commonOptions = {
     tk: process.env.TIANDITU_TK,
     tileMatrixSet: req.query.tileMatrixSet || "c",
@@ -13,6 +14,7 @@ app.get("/tianditu", async (req, res) => {
     y: req.query.y,
     x: req.query.x,
     format: req.query.format || "webp",
+    cacheDisabled,
     cacheDir: process.env.TILE_CACHE_DIR
   };
   let filePath = null;

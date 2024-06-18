@@ -19,7 +19,10 @@ async function downloadTileImage(options, cachePath) {
 
 async function getTileImagePath(options) {
   const mainLayerCachePath = getCacheFilePath(options);
-  const ex = checkFileExists(mainLayerCachePath);
+  let ex = false;
+  if (!options.cacheDisabled) {
+    ex = checkFileExists(mainLayerCachePath);
+  }
   if (!ex) {
     await downloadTileImage(options, mainLayerCachePath);
   }
@@ -32,7 +35,10 @@ async function getMergedTileImagePath(options) {
     ...restOptions,
     layer: `${layer}_${annotation}`
   });
-  const ex = checkFileExists(mergedLayerCachePath);
+  let ex = false;
+  if (!options.cacheDisabled) {
+    ex = checkFileExists(mergedLayerCachePath);
+  }
   if (!ex) {
     const [mainLayerCachePath, annotationLayerCachePath] = await Promise.all([
       getTileImagePath({
