@@ -1,6 +1,6 @@
 const { getTiandituUrl, getFakeHeaders } = require("../utils/tianditu");
 const { fetchBuffer } = require("../utils/request");
-const { saveImage } = require("../utils/image");
+const { saveImage, mergeImages } = require("../utils/image");
 const { getCacheFilePath } = require("../utils/cache");
 const { checkFileExists } = require("../utils/file");
 
@@ -26,6 +26,32 @@ async function getTileImagePath(options) {
   return mainLayerCachePath;
 }
 
+async function getMergedTileImagePath(options) {
+  const { layer, annotation, ...restOptions } = options;
+  const mergedLayerCachePath = getCacheFilePath({
+    ...restOptions,
+    layer: `${layer}_${annotation}`
+  });
+  const ex = checkFileExists(mergedLayerCachePath);
+  if (!ex) {
+    const [mainLayerCachePath, annotationLayerCachePath] = await Promise.all([
+      getTileImagePath({
+        ...restOptions,
+        layer
+      }),
+      getTileImagePath({
+        ...restOptions,
+        layer: annotation
+      })
+    ]);
+    await mergeImages([mainLayerCachePath, annotationLayerCachePath], {
+      path: mergedLayerCachePath
+    });
+  }
+  return mergedLayerCachePath;
+}
+
 module.exports = {
-  getTileImagePath
+  getTileImagePath,
+  getMergedTileImagePath
 };
