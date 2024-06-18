@@ -66,5 +66,8 @@ async function saveTileImage(options) {
 }
 
 module.exports = {
+  getImagePathInfo,
+  checkImageExists,
+  prepareImageDir,
   saveTileImage,
 };

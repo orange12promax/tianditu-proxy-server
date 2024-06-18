@@ -3,6 +3,7 @@ dotenv.config();
 const express = require("express");
 const app = express();
 const { saveTileImage } = require("./file");
+const { mergeImages } = require("./image");
 
 app.get("/tianditu", async (req, res) => {
   const { layer, z, y, x } = req.query;
@@ -15,7 +16,21 @@ app.get("/tianditu", async (req, res) => {
     x,
   };
   const imgPath = await saveTileImage(options);
-  res.sendFile(imgPath);
+  if (layer === "vec") {
+    const annotation = await saveTileImage({
+      ...options,
+      layer: "cva",
+    });
+    const mergedOptions = {
+      ...options,
+      layer: "vec_cva",
+    };
+    const mergedPath = await mergeImages([imgPath, annotation], mergedOptions);
+    // return mergedPath;
+    res.sendFile(mergedPath);
+  } else {
+    res.sendFile(imgPath);
+  }
 });
 
 app.listen(3000);
