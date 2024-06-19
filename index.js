@@ -4,8 +4,8 @@ const express = require("express");
 const {
   getTileImagePath,
   getMergedTileImagePath
-} = require("./src/methods/tile");
-const database = require("./src/database/index");
+} = require("./src/methods/index");
+require("./src/database/index");
 const app = express();
 
 app.get("/tianditu", async (req, res) => {

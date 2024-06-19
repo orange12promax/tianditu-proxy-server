@@ -4,7 +4,7 @@ const { mergeImages } = require("../utils/image");
 const { getCacheFilePath } = require("../utils/cache");
 const { checkFileExists, writeFileBuffer } = require("../utils/file");
 const { insertTileRecord, updateTileRecord } = require("../database/tile");
-const { queryTileCacheBuffer } = require("../tile/basic");
+const { queryTileCacheBuffer } = require("./basic");
 const sharp = require("sharp");
 
 async function downloadTileImage(options) {
