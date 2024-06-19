@@ -1,5 +1,7 @@
 const { queryTileRecord, removeTileRecord } = require("../database/tile");
 const { checkFileExists, readFileBuffer } = require("../utils/file");
+const { getTiandituUrl, getFakeHeaders } = require("../utils/tianditu");
+const { fetchBuffer } = require("../utils/request");
 
 async function queryTileCacheBuffer(options) {
   const cacheRecord = await queryTileRecord(options);
@@ -15,6 +17,15 @@ async function queryTileCacheBuffer(options) {
   return null;
 }
 
+async function queryNativeTileBuffer(options) {
+  const tileUrl = getTiandituUrl(options);
+  const tileBuffer = await fetchBuffer(tileUrl, {
+    headers: getFakeHeaders()
+  });
+  return tileBuffer;
+}
+
 module.exports = {
-  queryTileCacheBuffer
+  queryTileCacheBuffer,
+  queryNativeTileBuffer
 };

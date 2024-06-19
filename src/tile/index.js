@@ -1,18 +1,13 @@
-const { getTiandituUrl, getFakeHeaders } = require("../utils/tianditu");
-const { fetchBuffer } = require("../utils/request");
 const { mergeImages } = require("../utils/image");
 const { getCacheFilePath } = require("../utils/cache");
 const { checkFileExists, writeFileBuffer } = require("../utils/file");
 const { insertTileRecord, updateTileRecord } = require("../database/tile");
-const { queryTileCacheBuffer } = require("./basic");
+const { queryTileCacheBuffer, queryNativeTileBuffer } = require("./basic");
 const sharp = require("sharp");
 
 async function downloadTileImage(options) {
   const insertId = await insertTileRecord(options);
-  const mainLayerTileUrl = getTiandituUrl(options);
-  const mainLayerBuffer = await fetchBuffer(mainLayerTileUrl, {
-    headers: getFakeHeaders()
-  });
+  const mainLayerBuffer = await queryNativeTileBuffer(options);
   const meta = await sharp(mainLayerBuffer).metadata();
   const cachePath = getCacheFilePath({ ...options, format: meta.format });
   await writeFileBuffer(cachePath, mainLayerBuffer);
