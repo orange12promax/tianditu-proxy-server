@@ -1,6 +1,6 @@
 const { getTiandituUrl, getFakeHeaders } = require("../utils/tianditu");
 const { fetchBuffer } = require("../utils/request");
-const { saveImage, mergeImages } = require("../utils/image");
+const { mergeImages } = require("../utils/image");
 const { getCacheFilePath } = require("../utils/cache");
 const { checkFileExists, writeFileBuffer } = require("../utils/file");
 const { insertTileRecord, updateTileRecord } = require("../database/tile");
@@ -30,16 +30,6 @@ async function getTileImagePath(options) {
   } else {
     return await downloadTileImage(options);
   }
-  // console.log(cacheRecord);
-  // const mainLayerCachePath = getCacheFilePath(options);
-  // let ex = false;
-  // if (!options.cacheDisabled) {
-  //   ex = checkFileExists(mainLayerCachePath);
-  // }
-  // if (!ex) {
-  //   await downloadTileImage(options, mainLayerCachePath);
-  // }
-  // return mainLayerCachePath;
 }
 
 async function getMergedTileImagePath(options) {
