@@ -1,8 +1,11 @@
 const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
-const { getTileImagePath, getMergedTileImagePath } = require("./methods/tile");
-const database = require("./database/index");
+const {
+  getTileImagePath,
+  getMergedTileImagePath
+} = require("./src/methods/tile");
+const database = require("./src/database/index");
 const app = express();
 
 app.get("/tianditu", async (req, res) => {

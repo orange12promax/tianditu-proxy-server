@@ -3,8 +3,15 @@ const { fetchBuffer } = require("../utils/request");
 const { saveImage, mergeImages } = require("../utils/image");
 const { getCacheFilePath } = require("../utils/cache");
 const { checkFileExists } = require("../utils/file");
+const {
+  queryTileRecord,
+  insertTileRecord,
+  updateTileRecord
+} = require("../database/tile");
 
-async function downloadTileImage(options, cachePath) {
+async function downloadTileImage(options) {
+  const cachePath = getCacheFilePath(options);
+  const insertId = await insertTileRecord(options);
   const { format, ...restOptions } = options;
   const mainLayerTileUrl = getTiandituUrl(restOptions);
   const mainLayerBuffer = await fetchBuffer(mainLayerTileUrl, {
@@ -14,19 +21,31 @@ async function downloadTileImage(options, cachePath) {
     format,
     path: cachePath
   });
-  return mainLayerBuffer;
+
+  await updateTileRecord({
+    id: insertId,
+    path: cachePath
+  });
+  return cachePath;
 }
 
 async function getTileImagePath(options) {
-  const mainLayerCachePath = getCacheFilePath(options);
-  let ex = false;
-  if (!options.cacheDisabled) {
-    ex = checkFileExists(mainLayerCachePath);
+  const cacheRecord = await queryTileRecord(options);
+  if (cacheRecord?.path) {
+    return cacheRecord.path;
+  } else {
+    return await downloadTileImage(options);
   }
-  if (!ex) {
-    await downloadTileImage(options, mainLayerCachePath);
-  }
-  return mainLayerCachePath;
+  // console.log(cacheRecord);
+  // const mainLayerCachePath = getCacheFilePath(options);
+  // let ex = false;
+  // if (!options.cacheDisabled) {
+  //   ex = checkFileExists(mainLayerCachePath);
+  // }
+  // if (!ex) {
+  //   await downloadTileImage(options, mainLayerCachePath);
+  // }
+  // return mainLayerCachePath;
 }
 
 async function getMergedTileImagePath(options) {
