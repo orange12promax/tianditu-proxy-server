@@ -71,10 +71,17 @@ function queryTileRecord(record) {
   const sql = `SELECT id, path FROM ${tableName} WHERE layer = ? AND tile_matrix_set = ? AND x = ? AND y = ? AND z = ?`;
   return get(sql, [layer, tileMatrixSet, x, y, z]);
 }
+// 移除瓦片记录
+function removeTileRecord(record) {
+  const { id } = record;
+  const sql = `DELETE FROM ${tableName} WHERE id = ?`;
+  return run(sql, [id]);
+}
 
 module.exports = {
   createTileTable,
   insertTileRecord,
   updateTileRecord,
-  queryTileRecord
+  queryTileRecord,
+  removeTileRecord
 };

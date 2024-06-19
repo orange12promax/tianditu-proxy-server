@@ -14,7 +14,19 @@ function checkFileExists(filePath) {
   return fs.existsSync(filePath);
 }
 
+// 读取文件为Buffer
+function readFileBuffer(filePath) {
+  return fs.readFileSync(filePath);
+}
+// 将buffer写入文件
+function writeFileBuffer(filePath, buffer) {
+  createFileDir(filePath);
+  fs.writeFileSync(filePath, buffer);
+}
+
 module.exports = {
   createFileDir,
-  checkFileExists
+  checkFileExists,
+  readFileBuffer,
+  writeFileBuffer
 };
