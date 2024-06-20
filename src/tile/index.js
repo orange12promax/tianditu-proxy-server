@@ -28,12 +28,10 @@ async function getTileImageBuffer(options) {
 }
 
 async function getMergedTileImageBuffer(options) {
-  console.log(`---------- ${options.z}/${options.y}/${options.x} ----------`);
   const { layer, annotation, ...restOptions } = options;
   const mOptions = { ...restOptions, layer: `${layer}_${annotation}` };
   const mBuffer = await queryTileCacheBuffer(mOptions);
   if (mBuffer) {
-    console.log("直接命中缓存");
     return mBuffer;
   } else {
     const insertId = await insertTileRecord(mOptions);
