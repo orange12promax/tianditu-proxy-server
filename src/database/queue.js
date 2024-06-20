@@ -1,4 +1,4 @@
-const { run, get, intTypeValue, textTypeValue } = require("./basic");
+const { run, runMany, get, intTypeValue, textTypeValue } = require("./basic");
 
 // 创建tianditu_tiles表
 // 字段：x, y, z, tile, tile_matrix_set,path,status
@@ -30,11 +30,14 @@ function createQueueTable() {
   return run(`CREATE TABLE IF NOT EXISTS ${tableName} (${columns.join(",")})`);
 }
 
-async function addTask(name, param) {
-  const res = await run(
-    `INSERT INTO ${tableName} (name, param, status) VALUES ('${name}', '${param}', 0)`
+function addTask(name, params) {
+  return runMany(
+    `INSERT INTO ${tableName} (name, param, status) VALUES (?, ?, ?)`,
+    params.map((param) => {
+      const paramStr = JSON.stringify(param);
+      return [name, paramStr, 0];
+    })
   );
-  return res.lastID;
 }
 
 async function getNextTask(name) {
@@ -42,8 +45,12 @@ async function getNextTask(name) {
   const res = await get(
     `SELECT id, param FROM ${tableName} WHERE name = '${name}' AND status = 0 ORDER BY id ASC LIMIT 1`
   );
-  console.log(res);
-  return res;
+  if (res) {
+    const { id, param } = res;
+    return { id, param: JSON.parse(param) };
+  } else {
+    return null;
+  }
 }
 
 function updateTask(id, status) {

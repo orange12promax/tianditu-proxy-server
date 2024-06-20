@@ -7,8 +7,8 @@ function getCacheFilePath(options) {
     cacheDir,
     `tianditu_${tileMatrixSet}`,
     layer,
-    z,
-    y,
+    String(z),
+    String(y),
     fileName
   );
 }

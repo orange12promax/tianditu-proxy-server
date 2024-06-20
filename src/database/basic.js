@@ -45,9 +45,26 @@ function get() {
   });
 }
 
+function runMany(query, params) {
+  return new Promise((resolve, reject) => {
+    const stat = db.prepare(query);
+    for (const param of params) {
+      stat.run(param);
+    }
+    stat.finalize((err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
 module.exports = {
   createConnection,
   run,
+  runMany,
   get,
   textTypeValue,
   intTypeValue
