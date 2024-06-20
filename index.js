@@ -2,9 +2,9 @@ const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
 const {
-  getTileImagePath,
-  getMergedTileImagePath
-} = require("./src/methods/index");
+  getTileImageBuffer,
+  getMergedTileImageBuffer
+} = require("./src/tile/index");
 require("./src/database/index");
 const app = express();
 
@@ -21,15 +21,17 @@ app.get("/tianditu", async (req, res) => {
   };
   let filePath = null;
   if (req.query.annotation) {
-    filePath = await getMergedTileImagePath({
+    const format = req.query.format || "webp";
+    filePath = await getMergedTileImageBuffer({
       ...commonOptions,
-      format: req.query.format || "webp",
+      format,
       layer: req.query.layer,
       annotation: req.query.annotation
     });
-    res.sendFile(filePath);
+    res.setHeader("Content-Type", `image/${format}`);
+    res.send(filePath);
   } else {
-    filePath = await getTileImagePath({
+    filePath = await getTileImageBuffer({
       ...commonOptions,
       layer: req.query.layer
     });
