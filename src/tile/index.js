@@ -1,6 +1,7 @@
 const { mergeImages } = require("../utils/image");
 const { getCacheFilePath } = require("../utils/cache");
 const { writeFileBuffer } = require("../utils/file");
+const { getAnnotationLayer } = require("../utils/tianditu");
 const { insertTileRecord, updateTileRecord } = require("../database/tile");
 const { queryTileCacheBuffer, queryNativeTileBuffer } = require("./basic");
 const sharp = require("sharp");
@@ -28,34 +29,39 @@ async function getTileImageBuffer(options) {
 }
 
 async function getMergedTileImageBuffer(options) {
-  const { layer, annotation, ...restOptions } = options;
-  const mOptions = { ...restOptions, layer: `${layer}_${annotation}` };
-  const mBuffer = await queryTileCacheBuffer(mOptions);
-  if (mBuffer) {
-    return mBuffer;
+  const { layer, ...restOptions } = options;
+  const annotation = getAnnotationLayer(layer);
+  if (annotation) {
+    const mOptions = { ...restOptions, layer: `${layer}_${annotation}` };
+    const mBuffer = await queryTileCacheBuffer(mOptions);
+    if (mBuffer) {
+      return mBuffer;
+    } else {
+      const insertId = await insertTileRecord(mOptions);
+      const [mainBuffer, annotationBuffer] = await Promise.all([
+        getTileImageBuffer({
+          ...restOptions,
+          layer
+        }),
+        getTileImageBuffer({
+          ...restOptions,
+          layer: annotation
+        })
+      ]);
+      const mCachePath = getCacheFilePath(mOptions);
+      const newBuffer = await mergeImages([mainBuffer, annotationBuffer], {
+        format: options.format,
+        path: mCachePath
+      });
+      writeFileBuffer(mCachePath, newBuffer);
+      await updateTileRecord({
+        id: insertId,
+        path: mCachePath
+      });
+      return newBuffer;
+    }
   } else {
-    const insertId = await insertTileRecord(mOptions);
-    const [mainBuffer, annotationBuffer] = await Promise.all([
-      getTileImageBuffer({
-        ...restOptions,
-        layer
-      }),
-      getTileImageBuffer({
-        ...restOptions,
-        layer: annotation
-      })
-    ]);
-    const mCachePath = getCacheFilePath(mOptions);
-    const newBuffer = await mergeImages([mainBuffer, annotationBuffer], {
-      format: options.format,
-      path: mCachePath
-    });
-    writeFileBuffer(mCachePath, newBuffer);
-    await updateTileRecord({
-      id: insertId,
-      path: mCachePath
-    });
-    return newBuffer;
+    return null;
   }
 }
 

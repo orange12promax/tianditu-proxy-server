@@ -28,7 +28,21 @@ function getFakeHeaders() {
   };
 }
 
+function getAnnotationLayer(layer) {
+  switch (layer) {
+    case "vec":
+      return "cva";
+    case "img":
+      return "cia";
+    case "ter":
+      return "cta";
+    default:
+      return null;
+  }
+}
+
 module.exports = {
   getTiandituUrl,
-  getFakeHeaders
+  getFakeHeaders,
+  getAnnotationLayer
 };
