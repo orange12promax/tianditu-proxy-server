@@ -1,6 +1,7 @@
 const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
+var cors = require("cors");
 const {
   getTileImageBuffer,
   getMergedTileImageBuffer
@@ -10,6 +11,7 @@ const { createQueue, startQueue } = require("./src/queue/index");
 const { generateTileParams } = require("./src/queue/tile");
 
 const app = express();
+app.use(cors());
 
 app.get("/tianditu", async (req, res) => {
   const cacheDisabled = parseInt(process.env.CACHE_DISABLED) === 1;
@@ -63,4 +65,4 @@ app.get("/queue/create", async (req, res) => {
   res.send(list);
 });
 
-app.listen(3000);
+app.listen(13000);
