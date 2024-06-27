@@ -26,10 +26,9 @@ async function queryNativeTileBuffer(options) {
   return tileBuffer;
 }
 
-// 通过minio获取buffer
-async function getBufferThroughMinio(options) {
+async function handleBufferThroughMinio(options, callback) {
   const insertId = await insertTileRecord(options);
-  const buffer = await queryNativeTileBuffer(options);
+  const buffer = await callback(options);
   const format = await getImageFormat(buffer);
   const fullName = getTileImageFullName({
     ...options,
@@ -44,7 +43,7 @@ async function getBufferThroughMinio(options) {
 }
 
 // 通过minio获取stream
-async function getCacheStreamFromMinio(options) {
+async function getCacheBuffer(options) {
   const record = await queryTileRecord(options);
   if (record?.path) {
     const stream = await getObject(record.path);
@@ -52,7 +51,7 @@ async function getCacheStreamFromMinio(options) {
       const buffer = await getBufferFromStream(stream);
       return buffer;
     } else {
-      removeTileRecord({
+      await removeTileRecord({
         id: record.id
       });
     }
@@ -63,6 +62,6 @@ async function getCacheStreamFromMinio(options) {
 module.exports = {
   getTileImageFullName,
   queryNativeTileBuffer,
-  getBufferThroughMinio,
-  getCacheStreamFromMinio
+  getCacheBuffer,
+  handleBufferThroughMinio
 };
