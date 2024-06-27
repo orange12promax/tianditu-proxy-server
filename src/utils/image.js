@@ -9,9 +9,8 @@ function mergeImages(images) {
 }
 
 // 获取图片格式
-async function getImageFormat(buffer) {
-  const meta = await sharp(buffer).metadata();
-  return meta.format;
+function getImageMeta(buffer) {
+  return sharp(buffer).metadata();
 }
 
-module.exports = { mergeImages, getImageFormat };
+module.exports = { mergeImages, getImageMeta };

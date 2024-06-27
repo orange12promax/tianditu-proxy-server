@@ -7,7 +7,7 @@ const {
 const { getTiandituUrl, getFakeHeaders } = require("../utils/tianditu");
 const { fetchBuffer } = require("../utils/request");
 const { getObject, putObject } = require("../minio/index");
-const { getImageFormat } = require("../utils/image");
+const { getImageMeta } = require("../utils/image");
 const { getBufferFromStream } = require("../utils/stream");
 
 // 根据配置获取文件全名
@@ -29,7 +29,7 @@ async function queryNativeTileBuffer(options) {
 async function handleBufferThroughMinio(options, callback) {
   const insertId = await insertTileRecord(options);
   const buffer = await callback(options);
-  const format = await getImageFormat(buffer);
+  const { size, format } = await getImageMeta(buffer);
   const fullName = getTileImageFullName({
     ...options,
     format
@@ -37,7 +37,7 @@ async function handleBufferThroughMinio(options, callback) {
   const meta = {
     "Content-Type": `image/${format}`
   };
-  await putObject(fullName, buffer, meta);
+  await putObject(fullName, buffer, size, meta);
   await updateTileRecord({
     id: insertId,
     path: fullName
