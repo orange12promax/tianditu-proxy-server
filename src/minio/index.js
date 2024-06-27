@@ -12,9 +12,9 @@ const minioClient = new Minio.Client({
 });
 
 // 上传文件流
-function putObject(objectName, buffer) {
+function putObject(objectName, buffer, meta) {
   return new Promise((resolve, reject) => {
-    minioClient.putObject(bucketName, objectName, buffer, (err, etag) => {
+    minioClient.putObject(bucketName, objectName, buffer, meta, (err, etag) => {
       if (err) {
         reject(err);
       } else {
@@ -41,6 +41,7 @@ function statObject(objectName) {
 async function getObject(objectName) {
   const stat = await statObject(objectName);
   if (!stat) return null;
+  console.log(stat);
   const object = await minioClient.getObject(bucketName, objectName);
   return object;
 }

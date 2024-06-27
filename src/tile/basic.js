@@ -34,7 +34,10 @@ async function handleBufferThroughMinio(options, callback) {
     ...options,
     format
   });
-  await putObject(fullName, buffer);
+  const meta = {
+    "Content-Type": `image/${format}`
+  };
+  await putObject(fullName, buffer, meta);
   await updateTileRecord({
     id: insertId,
     path: fullName
