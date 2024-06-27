@@ -2,7 +2,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 function getTiandituUrl(options) {
-  const { layer, tileMatrixSet, tk, z, y, x } = options;
+  const { layer, tileMatrixSet, z, y, x } = options;
   // t0-t7
   const domainNum = Math.floor(Math.random() * 8);
   const domain = `t${domainNum}.tianditu.gov.cn`;
