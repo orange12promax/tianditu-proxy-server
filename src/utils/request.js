@@ -1,16 +1,11 @@
 const http = require("node:http");
+const { getBufferFromStream } = require("./stream");
 
 function fetchBuffer(url, options) {
   return new Promise((resolve) => {
-    http.get(url, options, (res) => {
-      const data = [];
-      res
-        .on("data", (chunk) => {
-          data.push(chunk);
-        })
-        .on("end", () => {
-          resolve(Buffer.concat(data));
-        });
+    http.get(url, options, async (res) => {
+      const buffer = await getBufferFromStream(res);
+      resolve(buffer);
     });
   });
 }

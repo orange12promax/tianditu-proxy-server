@@ -8,13 +8,16 @@ const { getTiandituUrl, getFakeHeaders } = require("../utils/tianditu");
 const { fetchBuffer } = require("../utils/request");
 const { getObject, putObject } = require("../minio/index");
 const { getImageFormat } = require("../utils/image");
+const { getBufferFromStream } = require("../utils/stream");
 
+// 根据配置获取文件全名
 function getTileImageFullName(options) {
   const { layer, tileMatrixSet, z, y, x, format } = options;
   const fileName = `${x}.${format}`;
   return [tileMatrixSet, layer, String(z), String(y), fileName].join("/");
 }
 
+// 下载图片buffer
 async function queryNativeTileBuffer(options) {
   const tileUrl = getTiandituUrl(options);
   const tileBuffer = await fetchBuffer(tileUrl, {
@@ -23,6 +26,7 @@ async function queryNativeTileBuffer(options) {
   return tileBuffer;
 }
 
+// 通过minio获取buffer
 async function getBufferThroughMinio(options) {
   const insertId = await insertTileRecord(options);
   const buffer = await queryNativeTileBuffer(options);
@@ -39,12 +43,14 @@ async function getBufferThroughMinio(options) {
   return buffer;
 }
 
+// 通过minio获取stream
 async function getCacheStreamFromMinio(options) {
   const record = await queryTileRecord(options);
   if (record?.path) {
     const stream = await getObject(record.path);
     if (stream) {
-      return stream;
+      const buffer = await getBufferFromStream(stream);
+      return buffer;
     } else {
       removeTileRecord({
         id: record.id

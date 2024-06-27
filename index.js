@@ -1,9 +1,6 @@
 const express = require("express");
 var cors = require("cors");
-const {
-  getCacheStreamFromMinio,
-  getBufferThroughMinio
-} = require("./src/tile/basic");
+const { getBuffer } = require("./src/tile");
 require("./src/database/index");
 
 const app = express();
@@ -21,15 +18,26 @@ app.get("/n/:layer/:z/:x/:y", async (req, res) => {
     x,
     layer
   };
-  const cacheStream = await getCacheStreamFromMinio(options);
-  if (cacheStream) {
-    cacheStream.pipe(res);
-    return;
-  } else {
-    const buffer = await getBufferThroughMinio(options);
-    res.setHeader("Content-Type", `image/png`);
-    res.send(buffer);
-  }
+  const buffer = await getBuffer(options);
+  res.setHeader("Content-Type", `image/png`);
+  res.send(buffer);
+});
+
+app.get("/m/:layer/:z/:x/:y", async (req, res) => {
+  const {
+    params: { x, y, z, layer },
+    query: { tileMatrixSet }
+  } = req;
+  const options = {
+    tileMatrixSet: tileMatrixSet || "w",
+    z,
+    y,
+    x,
+    layer
+  };
+  const buffer = await getBuffer(options);
+  res.setHeader("Content-Type", `image/png`);
+  res.send(buffer);
 });
 
 app.listen(13000);
