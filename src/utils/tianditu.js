@@ -1,3 +1,6 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
 function getTiandituUrl(options) {
   const { layer, tileMatrixSet, tk, z, y, x } = options;
   // t0-t7
@@ -15,7 +18,7 @@ function getTiandituUrl(options) {
     TILEMATRIX: z,
     TILEROW: y,
     TILECOL: x,
-    tk
+    tk: process.env.TIANDITU_TK
   };
   const searchParams = new URLSearchParams(params);
   return `http://${url}?${searchParams.toString()}`;

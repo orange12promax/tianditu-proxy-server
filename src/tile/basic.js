@@ -7,6 +7,7 @@ const {
 const { getTiandituUrl, getFakeHeaders } = require("../utils/tianditu");
 const { fetchBuffer } = require("../utils/request");
 const { getObject, putObject } = require("../minio/index");
+const { getImageFormat } = require("../utils/image");
 
 function getTileImageFullName(options) {
   const { layer, tileMatrixSet, z, y, x, format } = options;
@@ -24,8 +25,12 @@ async function queryNativeTileBuffer(options) {
 
 async function getBufferThroughMinio(options) {
   const insertId = await insertTileRecord(options);
-  const fullName = getTileImageFullName(options);
   const buffer = await queryNativeTileBuffer(options);
+  const format = await getImageFormat(buffer);
+  const fullName = getTileImageFullName({
+    ...options,
+    format
+  });
   await putObject(fullName, buffer);
   await updateTileRecord({
     id: insertId,

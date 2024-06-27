@@ -1,5 +1,3 @@
-const dotenv = require("dotenv");
-dotenv.config();
 const express = require("express");
 var cors = require("cors");
 const {
@@ -11,18 +9,16 @@ require("./src/database/index");
 const app = express();
 app.use(cors());
 
-app.get("/tianditu/:layer/:z/:x/:y", async (req, res) => {
+app.get("/n/:layer/:z/:x/:y", async (req, res) => {
   const {
-    params: { x, y, z, layer }
+    params: { x, y, z, layer },
+    query: { tileMatrixSet }
   } = req;
-  const format = req.query.format || "png";
   const options = {
-    tk: process.env.TIANDITU_TK,
-    tileMatrixSet: req.query.tileMatrixSet || "w",
+    tileMatrixSet: tileMatrixSet || "w",
     z,
     y,
     x,
-    format,
     layer
   };
   const cacheStream = await getCacheStreamFromMinio(options);
@@ -31,7 +27,7 @@ app.get("/tianditu/:layer/:z/:x/:y", async (req, res) => {
     return;
   } else {
     const buffer = await getBufferThroughMinio(options);
-    res.setHeader("Content-Type", `image/${format}`);
+    res.setHeader("Content-Type", `image/png`);
     res.send(buffer);
   }
 });
