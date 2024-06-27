@@ -10,7 +10,7 @@ const { generateTileParams } = require("./src/queue/tile");
 const app = express();
 app.use(cors());
 
-app.get("/tianditu/:layer/:z/:y/:x", async (req, res) => {
+app.get("/tianditu/:layer/:z/:x/:y", async (req, res) => {
   const cacheDisabled = parseInt(process.env.CACHE_DISABLED) === 1;
   const {
     params: { x, y, z, layer }
