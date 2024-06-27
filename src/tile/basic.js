@@ -12,9 +12,9 @@ const { getBufferFromStream } = require("../utils/stream");
 
 // 根据配置获取文件全名
 function getTileImageFullName(options) {
-  const { layer, tileMatrixSet, z, y, x, format } = options;
-  const fileName = `${x}.${format}`;
-  return [tileMatrixSet, layer, String(z), String(y), fileName].join("/");
+  const { layer, tileMatrixSet, z, x, y, format } = options;
+  const fileName = `${y}.${format}`;
+  return [tileMatrixSet, layer, String(z), String(x), fileName].join("/");
 }
 
 // 下载图片buffer
