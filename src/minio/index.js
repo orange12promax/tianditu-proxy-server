@@ -13,22 +13,26 @@ const minioClient = new Minio.Client({
 
 // 上传文件流
 function putObject(objectName, buffer) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     minioClient.putObject(bucketName, objectName, buffer, (err, etag) => {
-      if (err) return console.log(err);
-      resolve(etag);
-      console.log("File uploaded successfully.", etag);
+      if (err) {
+        reject(err);
+      } else {
+        resolve(etag);
+      }
     });
   });
 }
 
 // 获取文件流信息
 function statObject(objectName) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     minioClient.statObject(bucketName, objectName, (err, stat) => {
-      if (err) return console.log(err);
-      resolve(stat);
-      console.log(stat);
+      if (err) {
+        reject(err);
+      } else {
+        resolve(stat);
+      }
     });
   });
 }
@@ -38,7 +42,6 @@ async function getObject(objectName) {
   const stat = await statObject(objectName);
   if (!stat) return null;
   const object = await minioClient.getObject(bucketName, objectName);
-  console.log(object);
   return object;
 }
 
