@@ -2,7 +2,10 @@ const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
 var cors = require("cors");
-const { getMergedTileImageBuffer } = require("./src/tile/index");
+const {
+  getCacheStreamFromMinio,
+  getBufferThroughMinio
+} = require("./src/tile/basic");
 require("./src/database/index");
 const { createQueue, startQueue } = require("./src/queue/index");
 const { generateTileParams } = require("./src/queue/tile");
@@ -11,27 +14,28 @@ const app = express();
 app.use(cors());
 
 app.get("/tianditu/:layer/:z/:x/:y", async (req, res) => {
-  const cacheDisabled = parseInt(process.env.CACHE_DISABLED) === 1;
   const {
     params: { x, y, z, layer }
   } = req;
-  const commonOptions = {
+  const format = req.query.format || "png";
+  const options = {
     tk: process.env.TIANDITU_TK,
     tileMatrixSet: req.query.tileMatrixSet || "w",
     z,
     y,
     x,
-    cacheDisabled,
-    cacheDir: process.env.TILE_CACHE_DIR
-  };
-  const format = req.query.format || "webp";
-  const buffer = await getMergedTileImageBuffer({
-    ...commonOptions,
     format,
     layer
-  });
-  res.setHeader("Content-Type", `image/${format}`);
-  res.send(buffer);
+  };
+  const cacheStream = await getCacheStreamFromMinio(options);
+  if (cacheStream) {
+    cacheStream.pipe(res);
+    return;
+  } else {
+    const buffer = await getBufferThroughMinio(options);
+    res.setHeader("Content-Type", `image/${format}`);
+    res.send(buffer);
+  }
 });
 
 app.get("/queue/create", async (req, res) => {
