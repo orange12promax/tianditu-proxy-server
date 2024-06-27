@@ -46,10 +46,8 @@ function statObject(objectName) {
 
 // 获取文件流
 async function getObject(objectName) {
-  console.log(objectName);
   const stat = await statObject(objectName);
   if (!stat) return null;
-  console.log(stat);
   const object = await minioClient.getObject(bucketName, objectName);
   return object;
 }
